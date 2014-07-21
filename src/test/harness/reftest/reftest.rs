@@ -85,9 +85,9 @@ fn parse_lists(file: &String, servo_args: &[String], render_mode: RenderMode) ->
     let mut tests = Vec::new();
     let mut next_id = 0;
     let file_path = Path::new(file.clone());
-    let contents = match File::open_mode(&file_path, io::Open, io::Read)
+    let contents: String = match File::open_mode(&file_path, io::Open, io::Read)
        .and_then(|mut f| {
-             f.read_to_str()
+             f.read_to_string()
              }) {
           Ok(s) => s,
              _ => fail!("Could not read file"),
@@ -112,7 +112,7 @@ fn parse_lists(file: &String, servo_args: &[String], render_mode: RenderMode) ->
                    line, part)
        };
        let src_path = file_path.dir_path();
-       let src_dir = src_path.display().to_str();
+       let src_dir = src_path.display().to_string();
        let file_left =  src_dir.clone().append("/").append(*parts.get(1));
        let file_right = src_dir.append("/").append(*parts.get(2));
 
@@ -185,13 +185,13 @@ fn check_reftest(reftest: Reftest) {
         let output_str = format!("/tmp/servo-reftest-{:06u}-diff.png", reftest.id);
         let output = from_str::<Path>(output_str.as_slice()).unwrap();
 
-        let img = png::Image {
+        let mut img = png::Image {
             width: left.width,
             height: left.height,
             color_type: png::RGBA8,
             pixels: pixels,
         };
-        let res = png::store_png(&img, &output);
+        let res = png::store_png(&mut img, &output);
         assert!(res.is_ok());
 
         assert!(reftest.kind == Different, "rendering difference: {}", output_str);
